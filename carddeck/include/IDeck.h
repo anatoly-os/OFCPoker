@@ -2,12 +2,13 @@
 
 #include <list>
 #include "ICard.h"
+#include "Exports.h"
 
 namespace CPoker
 {
   class ICard;
   
-  class IDeck
+  CARDDECK_API class IDeck
   {
   public:
     virtual ~IDeck() {}

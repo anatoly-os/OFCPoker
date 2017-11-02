@@ -39,6 +39,9 @@
     <ClInclude Include="include\IShuffler.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Exports.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PokerCard.cpp">

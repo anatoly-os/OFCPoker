@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Exports.h"
+
 namespace CPoker
 {
-  class ICard
+  CARDDECK_API class ICard
   {
   public:
     enum class Suit
