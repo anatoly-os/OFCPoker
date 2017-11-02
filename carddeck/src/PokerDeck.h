@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDeck.h"
+#include "../include/IDeck.h"
 
 namespace CPoker
 {

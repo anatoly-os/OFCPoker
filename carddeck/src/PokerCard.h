@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ICard.h"
+#include "../include/ICard.h"
 
 namespace CPoker
 {

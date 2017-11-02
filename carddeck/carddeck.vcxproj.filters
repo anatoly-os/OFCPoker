@@ -18,26 +18,26 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ICard.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\IDealer.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\IDeck.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\IShuffler.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ICardsHolder.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\PokerCard.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
     <ClInclude Include="src\PokerDeck.h">
       <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ICard.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ICardsHolder.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IDealer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IDeck.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IShuffler.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

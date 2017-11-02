@@ -116,11 +116,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\ICard.h" />
-    <ClInclude Include="src\ICardsHolder.h" />
-    <ClInclude Include="src\IDealer.h" />
-    <ClInclude Include="src\IDeck.h" />
-    <ClInclude Include="src\IShuffler.h" />
+    <ClInclude Include="include\ICard.h" />
+    <ClInclude Include="include\ICardsHolder.h" />
+    <ClInclude Include="include\IDealer.h" />
+    <ClInclude Include="include\IDeck.h" />
+    <ClInclude Include="include\IShuffler.h" />
     <ClInclude Include="src\PokerCard.h" />
     <ClInclude Include="src\PokerDeck.h" />
   </ItemGroup>
