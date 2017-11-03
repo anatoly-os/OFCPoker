@@ -41,7 +41,7 @@ IDeck::CardsList CPoker::PokerDeck::cardsInDeck() const
 
 IDeck::CardsList CPoker::PokerDeck::dealtCards() const
 {
-  return CardsList();
+  return m_aAlreadyDealtCards;
 }
 
 void CPoker::PokerDeck::initializeFullDeck()
