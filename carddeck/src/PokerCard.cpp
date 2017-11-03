@@ -1,4 +1,5 @@
 #include "PokerCard.h"
+#include "NamesHelper.h"
 
 using namespace CPoker;
 
@@ -25,4 +26,9 @@ ICard::Suit CPoker::PokerCard::suit() const
 ICard::Value CPoker::PokerCard::value() const
 {
   return m_value;
+}
+
+std::string CPoker::PokerCard::toString() const
+{
+  return NamesHelper::toString(m_value) + std::string(" Of ") + NamesHelper::toString(m_suit);
 }

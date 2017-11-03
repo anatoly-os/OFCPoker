@@ -39,12 +39,18 @@
     <ClInclude Include="include\IShuffler.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\NamesHelper.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PokerCard.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="src\PokerDeck.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NamesHelper.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>

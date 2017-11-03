@@ -1,6 +1,6 @@
 #pragma once
 
-#include <list>
+#include <vector>
 #include "ICard.h"
 
 namespace CPoker
@@ -12,12 +12,12 @@ namespace CPoker
   public:
     virtual ~IDeck() {}
 
-    using CardsList = std::list<ICard*>;
+    using CardsList = std::vector<ICard*>;
 
     virtual void shuffle() = 0;
 
     //sequence in list corresponds to dealing sequence
-    virtual CardsList deal(const unsigned int numberOfCardsToDeal) = 0;
+    virtual CardsList deal(const unsigned int numberOfCardsToDeal = 1) = 0;
     virtual CardsList cardsInDeck() const = 0;
     virtual CardsList dealtCards() const = 0;
   };

@@ -14,6 +14,8 @@ namespace CPoker
     ICard::Suit suit() const override;
     ICard::Value value() const override;
 
+    std::string toString() const override;
+
   private:
     ICard::Suit m_suit;
     ICard::Value m_value;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace CPoker
 {
   class ICard
@@ -10,7 +12,8 @@ namespace CPoker
       Spades,
       Hearts,
       Diamonds,
-      Clubs
+      Clubs,
+      Count
     };
 
     enum class Value
@@ -27,12 +30,15 @@ namespace CPoker
       Jack,
       Queen,
       King,
-      Ace
+      Ace,
+      Count
     };
 
     virtual ~ICard() {}
 
     virtual ICard::Suit suit() const = 0;
     virtual ICard::Value value() const = 0;
+
+    virtual std::string toString() const = 0;
   };
 }

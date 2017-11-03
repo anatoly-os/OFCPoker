@@ -122,10 +122,12 @@
     <ClInclude Include="include\IDealer.h" />
     <ClInclude Include="include\IDeck.h" />
     <ClInclude Include="include\IShuffler.h" />
+    <ClInclude Include="src\NamesHelper.h" />
     <ClInclude Include="src\PokerCard.h" />
     <ClInclude Include="src\PokerDeck.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\NamesHelper.cpp" />
     <ClCompile Include="src\PokerCard.cpp" />
     <ClCompile Include="src\PokerDeck.cpp" />
   </ItemGroup>
