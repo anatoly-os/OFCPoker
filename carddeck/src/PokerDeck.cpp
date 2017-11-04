@@ -1,5 +1,8 @@
-#include "PokerDeck.h"
+﻿#include "PokerDeck.h"
 #include "PokerCard.h"
+
+#include <random>
+#include <xutility>
 
 using namespace CPoker;
 
@@ -10,11 +13,38 @@ CPoker::PokerDeck::PokerDeck()
 
 CPoker::PokerDeck::~PokerDeck()
 {
+  for (auto pCard : m_aCards)
+    delete pCard;
+  m_aCards.clear();
+
+  for (auto pCard : m_aAlreadyDealtCards)
+    delete pCard;
+  m_aAlreadyDealtCards.clear();
 }
 
 void CPoker::PokerDeck::shuffle()
 {
-  return;
+  /* 
+  /  Fisher–Yates shuffle modern algo (wiki)
+  /
+  /  for i from n−1 downto 1 do
+  /    j ← random integer such that 0 ≤ j ≤ i
+  /    exchange a[j] and a[i]
+  */
+
+  //seed the RNG
+  std::random_device rd;
+  std::mt19937 mt(rd());
+
+  int shuffledIdx = m_aCards.size() - 1;
+  for (auto it = m_aCards.rbegin(); (shuffledIdx > 0) && (it != m_aCards.rend()); ++it, --shuffledIdx)
+  {
+    std::uniform_int_distribution<> dis(0, shuffledIdx);
+    const int randomIndex = dis(mt);
+
+    if (*it != m_aCards[randomIndex])
+      std::swap(m_aCards[randomIndex], *it);
+  }
 }
 
 IDeck::CardsList CPoker::PokerDeck::deal(const unsigned int numberOfCardsToDeal /*= 1*/)
