@@ -27,12 +27,6 @@
     <ClInclude Include="include\ICard.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ICardsHolder.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IDealer.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\IDeck.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -40,6 +34,15 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="src\NamesHelper.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IPlayer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IGameController.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameController.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
@@ -51,6 +54,9 @@
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="src\NamesHelper.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameController.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>
