@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPlayer.h"
+#include "IDeck.h"
 
 #include <vector>
 #include <functional>
@@ -22,7 +23,7 @@ namespace CPoker
       WaitPostGameFinish
     };
 
-    using CardsDealtCallback = std::function<void(IPlayer*, Round)>;
+    using CardsDealtCallback = std::function<void(const CPoker::IDeck::CardsList&, IPlayer*, Round)>;
     using GameFinishedCallback = std::function<void(bool)>;
 
     //call to start a game
@@ -32,10 +33,10 @@ namespace CPoker
     virtual void playerDoneItsMove(IPlayer*) = 0;
 
     //callback to react on dealing cards to a player
-    virtual void cardsDealt(CardsDealtCallback) = 0;
+    virtual void setCardsDealtCallback(CardsDealtCallback) = 0;
 
     //callback to react on finishing game
     //@bool - shows whether next round is fantasy round
-    virtual void gameFinished(GameFinishedCallback) = 0;
+    virtual void setGameFinishedCallback(GameFinishedCallback) = 0;
   };
 }

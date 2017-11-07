@@ -94,6 +94,8 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/D CARDDECK_EXPORTS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,7 +123,6 @@
     <ClInclude Include="include\IPlayer.h" />
     <ClInclude Include="include\IGameController.h" />
     <ClInclude Include="include\IDeck.h" />
-    <ClInclude Include="include\IShuffler.h" />
     <ClInclude Include="src\GameController.h" />
     <ClInclude Include="src\NamesHelper.h" />
     <ClInclude Include="src\PokerCard.h" />

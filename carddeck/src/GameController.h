@@ -1,8 +1,10 @@
 #pragma once
 
 #include "../include/IGameController.h"
+#include "../include/IDeck.h"
 
 #include <map>
+#include <memory>
 
 namespace CPoker
 {
@@ -14,8 +16,8 @@ namespace CPoker
     void startGame(std::vector<IPlayer*> apPlayers) override;
     void playerDoneItsMove(IPlayer* pPlayer) override;
 
-    void cardsDealt(CardsDealtCallback dealtCardsCb) override;
-    void gameFinished(GameFinishedCallback gameFinishedCb) override;
+    void setCardsDealtCallback(CardsDealtCallback dealtCardsCb) override;
+    void setGameFinishedCallback(GameFinishedCallback gameFinishedCb) override;
 
   private:
     enum class IngamePlayerStatus
@@ -25,6 +27,8 @@ namespace CPoker
       WaitForCards,
       WaitForPostGameFinish
     };
+
+    Round nextRound();
 
   private:
     //non copyable
@@ -38,5 +42,9 @@ namespace CPoker
     IPlayer* m_pPlayer3; //optional
     IPlayer* m_pButton;
     std::map<IPlayer*, IngamePlayerStatus> m_playersStatuses;
+    std::unique_ptr<IDeck> m_pDeck;
+
+    CardsDealtCallback m_cardsDealtCb;
+    GameFinishedCallback m_gameFinishedCb;
   };
 }
