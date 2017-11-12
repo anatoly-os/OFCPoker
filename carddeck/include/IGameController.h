@@ -3,8 +3,7 @@
 #include "IPlayer.h"
 #include "IDeck.h"
 
-#include <vector>
-#include <functional>
+#include <map>
 
 namespace CPoker
 {
@@ -23,20 +22,16 @@ namespace CPoker
       WaitPostGameFinish
     };
 
-    using CardsDealtCallback = std::function<void(const CPoker::IDeck::CardsList&, IPlayer*, Round)>;
-    using GameFinishedCallback = std::function<void(bool)>;
+    using PlayerStates = std::map<IPlayer::ID, IPlayer::State>;
 
-    //call to start a game
-    virtual void startGame(std::vector<IPlayer*>) = 0;
+    virtual void startGame(std::vector<IPlayer::ID>) = 0;
+    virtual IPlayer::ID button() const = 0;
+    virtual PlayerStates playerStates() const = 0;
 
-    //call to continue game after player is done his/her move
-    virtual void playerDoneItsMove(IPlayer*) = 0;
+    virtual Round round() const = 0;
+    virtual IPlayer::ID activePlayer() const = 0;
+    virtual IDeck::CardsList getCardsForActivePlayer() const = 0;
 
-    //callback to react on dealing cards to a player
-    virtual void setCardsDealtCallback(CardsDealtCallback) = 0;
-
-    //callback to react on finishing game
-    //@bool - shows whether next round is fantasy round
-    virtual void setGameFinishedCallback(GameFinishedCallback) = 0;
+    virtual void playerFinished(const IPlayer::ID&) const = 0;
   };
 }

@@ -9,34 +9,42 @@ CPoker::GameController::GameController()
   , m_pPlayer1(nullptr)
   , m_pPlayer2(nullptr)
   , m_pPlayer3(nullptr)
-  , m_pButton(nullptr)
   , m_pDeck(new PokerDeck())
 {
   m_pDeck->shuffle();
 }
 
-void CPoker::GameController::startGame(std::vector<IPlayer*> apPlayers)
+void CPoker::GameController::startGame(std::vector<IPlayer::ID>)
 {
-  while (m_round != Round::WaitPostGameFinish)
-  {
-    m_cardsDealtCb(m_pDeck->deal(5), apPlayers[0], Round::FiveCards);
-  }
-  m_gameFinishedCb;
 }
 
-void CPoker::GameController::playerDoneItsMove(IPlayer* pPlayer)
+IPlayer::ID CPoker::GameController::button() const
 {
-  m_round = nextRound();
+  return m_button;
 }
 
-void CPoker::GameController::setCardsDealtCallback(CardsDealtCallback dealtCardsCb)
+IGameController::PlayerStates CPoker::GameController::playerStates() const
 {
-  m_cardsDealtCb = dealtCardsCb;
+  return PlayerStates();
 }
 
-void CPoker::GameController::setGameFinishedCallback(GameFinishedCallback gameFinishedCb)
+IGameController::Round CPoker::GameController::round() const
 {
-  m_gameFinishedCb = gameFinishedCb;
+  return Round();
+}
+
+IPlayer::ID CPoker::GameController::activePlayer() const
+{
+  return IPlayer::ID();
+}
+
+IDeck::CardsList CPoker::GameController::getCardsForActivePlayer() const
+{
+  return IDeck::CardsList();
+}
+
+void CPoker::GameController::playerFinished(const IPlayer::ID& id) const
+{
 }
 
 CPoker::IGameController::Round CPoker::GameController::nextRound()

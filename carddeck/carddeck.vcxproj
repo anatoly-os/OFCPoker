@@ -125,12 +125,14 @@
     <ClInclude Include="include\IDeck.h" />
     <ClInclude Include="src\GameController.h" />
     <ClInclude Include="src\NamesHelper.h" />
+    <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\PokerCard.h" />
     <ClInclude Include="src\PokerDeck.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameController.cpp" />
     <ClCompile Include="src\NamesHelper.cpp" />
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\PokerCard.cpp" />
     <ClCompile Include="src\PokerDeck.cpp" />
   </ItemGroup>
