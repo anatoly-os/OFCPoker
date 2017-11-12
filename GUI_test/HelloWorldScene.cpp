@@ -4,9 +4,6 @@
 #include "carddeck\src\GameController.h"
 #include "carddeck\src\Player.h"
 
-#include "carddeck\include\IPlayer.h"
-#include "carddeck\include\IDeck.h"
-
 USING_NS_CC;
 
 using namespace CPoker;
@@ -105,12 +102,17 @@ void HelloWorld::nextMove()
       // add the label as a child to this layer
       this->addChild(label, 1, m_CardsLabelsTag);
     }
+
+    //test case - chosen cards are get from GUI player choice
+    m_chosenCards.clear();
+    m_chosenCards.push_back(dealtCards[0]);
+    m_chosenCards.push_back(dealtCards[1]);
   }
 }
 
 void HelloWorld::playerFinished(Ref* sender)
 {
-  m_pGameController->playerFinished(m_pGameController->activePlayer());
+  m_pGameController->playerFinished(m_chosenCards);
   nextMove();
 }
 

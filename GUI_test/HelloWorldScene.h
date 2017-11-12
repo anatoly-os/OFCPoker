@@ -6,6 +6,7 @@
 
 #include "carddeck\include\IGameController.h"
 #include "carddeck\include\IPlayer.h"
+#include "carddeck\include\IDeck.h"
 
 class HelloWorld : public cocos2d::Scene
 {
@@ -29,6 +30,8 @@ private:
   //dummy players
   std::unique_ptr<CPoker::IPlayer> m_pPlayer1;
   std::unique_ptr<CPoker::IPlayer> m_pPlayer2;
+
+  CPoker::IDeck::CardsList m_chosenCards;
 
   const int m_CardsLabelsTag = 1;
   const int m_PlayerLabelTag = 2;
