@@ -32,5 +32,7 @@ namespace CPoker
     virtual IDeck::CardsList midRow() const = 0;
     virtual IDeck::CardsList bottomRow() const = 0;
     virtual IDeck::CardsList foldZone() const = 0;
+
+    virtual int ingameCardsCount() const = 0;
   };
 }

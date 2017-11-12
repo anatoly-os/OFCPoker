@@ -7,7 +7,8 @@ namespace CPoker
   class Player : public IPlayer
   {
   public:
-    Player();
+    //temp decision
+    explicit Player(int id);
     
     IPlayer::ID id() const override;
     void setId(const IPlayer::ID&) override;
@@ -16,6 +17,8 @@ namespace CPoker
     IDeck::CardsList midRow() const override;
     IDeck::CardsList bottomRow() const override;
     IDeck::CardsList foldZone() const override;
+
+    int ingameCardsCount() const override;
 
   private:
     IPlayer::ID m_id;
