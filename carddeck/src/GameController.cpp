@@ -15,8 +15,12 @@ CPoker::GameController::GameController()
   m_pDeck->shuffle();
 }
 
-void CPoker::GameController::startGame(std::vector<IPlayer::ID> ids)
+void CPoker::GameController::startGame(const std::vector<IPlayer::ID>& ids)
 {
+  m_pDeck.reset(new PokerDeck());
+  m_pDeck->shuffle();
+  m_round = IGameController::Round::WaitGameStart;
+
   m_pPlayer1.reset(new Player(ids[0].id));
   m_pPlayer2.reset(new Player(ids[1].id));
   m_button = m_pPlayer1->id();

@@ -24,7 +24,7 @@ namespace CPoker
 
     using PlayerStates = std::map<IPlayer::ID, IPlayer::State>;
 
-    virtual void startGame(std::vector<IPlayer::ID>) = 0;
+    virtual void startGame(const std::vector<IPlayer::ID>&) = 0;
     virtual IPlayer::ID button() const = 0;
     virtual PlayerStates playerStates() const = 0;
 

@@ -11,7 +11,7 @@ namespace CPoker
   public:
     GameController();
     
-    void startGame(std::vector<IPlayer::ID>) override;
+    void startGame(const std::vector<IPlayer::ID>&) override;
     IPlayer::ID button() const override;
     PlayerStates playerStates() const override;
 
