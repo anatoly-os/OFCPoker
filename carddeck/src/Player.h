@@ -18,6 +18,11 @@ namespace CPoker
     IDeck::CardsList bottomRow() const override;
     IDeck::CardsList foldZone() const override;
 
+    virtual void setTopRowCards(const IDeck::CardsList&) override;
+    virtual void setMidRowCards(const IDeck::CardsList&) override;
+    virtual void setBottomRowCards(const IDeck::CardsList&) override;
+    virtual void setFoldZoneCards(const IDeck::CardsList&) override;
+
     int ingameCardsCount() const override;
 
   private:

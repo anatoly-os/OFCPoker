@@ -64,8 +64,21 @@ IDeck::CardsList CPoker::GameController::getCardsForActivePlayer() const
   }
 }
 
-void CPoker::GameController::playerFinished(const IPlayer::ID& id)
+void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
 {
+  //test case - add all cards to the top row
+  //test case - no fantasies so active player is next player
+  if (m_pPlayer1->id() == activePlayer())
+  {
+    m_pPlayer1->setTopRowCards(chosenCards);
+    m_activePlayer = m_pPlayer2->id();
+  }
+  else if (m_pPlayer2->id() == activePlayer())
+  {
+    m_pPlayer2->setTopRowCards(chosenCards);
+    m_activePlayer = m_pPlayer1->id();
+  }
+  
   switch (m_round)
   {
   case Round::FiveCards:

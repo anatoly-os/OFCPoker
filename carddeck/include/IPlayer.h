@@ -19,6 +19,11 @@ namespace CPoker
     {
       int id = 0;
 
+      inline bool operator==(const ID& playerId) const
+      {
+        return id == playerId.id;
+      }
+
     private:
       const ID operator+(const ID&) = delete;
       const ID operator*(const ID&) = delete;
@@ -32,6 +37,11 @@ namespace CPoker
     virtual IDeck::CardsList midRow() const = 0;
     virtual IDeck::CardsList bottomRow() const = 0;
     virtual IDeck::CardsList foldZone() const = 0;
+
+    virtual void setTopRowCards(const IDeck::CardsList&) = 0;
+    virtual void setMidRowCards(const IDeck::CardsList&) = 0;
+    virtual void setBottomRowCards(const IDeck::CardsList&) = 0;
+    virtual void setFoldZoneCards(const IDeck::CardsList&) = 0;
 
     virtual int ingameCardsCount() const = 0;
   };
