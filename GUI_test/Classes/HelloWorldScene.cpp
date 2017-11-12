@@ -20,6 +20,17 @@ bool HelloWorld::init()
     
     //init game server (connect to one in future)
     m_pGameController.reset(new GameController());
+    m_playerLabelsTags.resize(3);
+    /////////////////////////////////////////////
+
+    //init game GUI
+    const auto visibleSize = Director::getInstance()->getVisibleSize();
+    const auto origin = Director::getInstance()->getVisibleOrigin();
+    m_player1GroupShift = Vec2(origin.x + m_cPlayerGroupShiftX, origin.y + Vec2(visibleSize).y - m_cPlayerGroupShiftY);
+    m_player2GroupShift = Vec2(origin.x + Vec2(visibleSize).x - m_cPlayerGroupShiftX, origin.y + Vec2(visibleSize).y - m_cPlayerGroupShiftY);
+    m_playerLabelsTags[0] = 1000;
+    m_playerLabelsTags[1] = 1001;
+    m_playerLabelsTags[2] = 1002;
     /////////////////////////////
 
     drawStartGameButton();
@@ -34,17 +45,20 @@ void HelloWorld::nextMove()
   if (m_pGameController->round() != IGameController::Round::WaitPostGameFinish)
   {
     clearGameFinished();
-    drawActivePlayer();
+    highlightActivePlayer();
 
-    auto dealtCards = m_pGameController->getCardsForActivePlayer();
-    drawCards(dealtCards);
+    auto dealtCards = m_pGameController->dealCardsForActivePlayer();
+    if (m_pGameController->activePlayer() == m_player1Id)
+      drawFirstPlayerCards(dealtCards);
+    else
+      drawSecondPlayerCards(dealtCards);
 
     processChosenCards(dealtCards);
   }
   else
   {
-    clearActivePlayer();
-    clearCards();
+    drawFirstPlayer(false);
+    drawSecondPlayer(false);
     drawGameFinished();
 
     m_pNextMoveMenuItem->setEnabled(false);
@@ -60,7 +74,7 @@ void HelloWorld::processChosenCards(const IDeck::CardsList& cards)
   switch (m_pGameController->round())
   {
   case IGameController::Round::Fantasy:
-    m_chosenCards.insert(m_chosenCards.end(), cards.begin(), cards.begin() + 13);
+    m_chosenCards.insert(m_chosenCards.end(), cards.begin(), cards.begin() + 14); //14 is temp while choosing cards is not finished
     break;
   case IGameController::Round::FiveCards:
     m_chosenCards.insert(m_chosenCards.end(), cards.begin(), cards.end());
@@ -69,7 +83,7 @@ void HelloWorld::processChosenCards(const IDeck::CardsList& cards)
   case IGameController::Round::ThreeCards2:
   case IGameController::Round::ThreeCards3:
   case IGameController::Round::ThreeCards4:
-    m_chosenCards.insert(m_chosenCards.end(), cards.begin(), cards.begin() + 2);
+    m_chosenCards.insert(m_chosenCards.end(), cards.begin(), cards.begin() + 3); //3 is temp while choosing cards is not finished
     break;
   }
 }
@@ -82,59 +96,134 @@ void HelloWorld::playerFinished(Ref* sender)
 
 void HelloWorld::startGame()
 {
+  //logic part
+  m_player1Id = IPlayer::ID(1);
+  m_player2Id = IPlayer::ID(2);
+  //GUI part
+  clearCards(); 
+  drawPlayers();
   m_pNextMoveMenuItem->setEnabled(true);
   m_pStartGameMenuItem->setEnabled(false);
 
-  m_pPlayer1.reset(new Player(1));
-  m_pPlayer2.reset(new Player(2));
-
   std::vector<IPlayer::ID> ids;
-  ids.push_back(m_pPlayer1->id());
-  ids.push_back(m_pPlayer2->id());
+  ids.push_back(m_player1Id);
+  ids.push_back(m_player2Id);
   m_pGameController->startGame(ids);
   nextMove();
 }
 
-void HelloWorld::drawActivePlayer()
+void HelloWorld::drawPlayers()
+{
+  drawFirstPlayer(false);
+  drawSecondPlayer(false);
+}
+
+void HelloWorld::drawFirstPlayer(bool isActive)
 {
   const auto visibleSize = Director::getInstance()->getVisibleSize();
   const auto origin = Director::getInstance()->getVisibleOrigin();
 
-  clearActivePlayer();
-  auto label = Label::createWithTTF(std::to_string(m_pGameController->activePlayer().id), "fonts/arial.ttf", TITLE_FONT_SIZE);
-  label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - label->getContentSize().height);
-  label->setColor(Color3B::BLUE);
-  addChild(label, 1, m_playerLabelTag);
+  auto label = Label::createWithTTF(std::to_string(m_player1Id.id), "fonts/arial.ttf", TITLE_FONT_SIZE);
+  label->setPosition(m_player1GroupShift);
+  auto color = isActive ? Color3B::GREEN : Color3B::GRAY;
+  label->setColor(color);
+  addChild(label, 1, m_playerLabelsTags[0]);
 }
 
-void HelloWorld::clearActivePlayer()
-{
-  removeChildByTag(m_playerLabelTag);
-}
-
-void HelloWorld::drawCards(const IDeck::CardsList& cards)
+void HelloWorld::drawSecondPlayer(bool isActive)
 {
   const auto visibleSize = Director::getInstance()->getVisibleSize();
   const auto origin = Director::getInstance()->getVisibleOrigin();
 
-  clearCards();
+  auto label = Label::createWithTTF(std::to_string(m_player2Id.id), "fonts/arial.ttf", TITLE_FONT_SIZE);
+  label->setPosition(m_player2GroupShift);
+  auto color = isActive ? Color3B::GREEN : Color3B::GRAY;
+  label->setColor(color);
+  addChild(label, 1, m_playerLabelsTags[1]);
+}
+
+void HelloWorld::highlightActivePlayer()
+{
+  const auto visibleSize = Director::getInstance()->getVisibleSize();
+  const auto origin = Director::getInstance()->getVisibleOrigin();
+
+  const auto activePlrId = m_pGameController->activePlayer();
+  clearPlayer(activePlrId);
+  if (activePlrId == m_player1Id)
+  {
+    drawFirstPlayer(true);
+    drawSecondPlayer(false);
+  }
+  else if (activePlrId == m_player2Id)
+  {
+    drawFirstPlayer(false);
+    drawSecondPlayer(true);
+  }
+}
+
+int HelloWorld::playerTagIdx(const IPlayer::ID& id)
+{
+  return (m_player2Id == id) ? 1 : 0;
+}
+
+void HelloWorld::clearPlayer(const IPlayer::ID& id)
+{
+  removeChildByTag(m_playerLabelsTags[playerTagIdx(id)]);
+}
+
+void HelloWorld::drawFirstPlayerCards(const IDeck::CardsList& cards)
+{
+  const auto visibleSize = Director::getInstance()->getVisibleSize();
+  const auto origin = Director::getInstance()->getVisibleOrigin();
+
+  const int alreadyDealtCards = m_pGameController->playerIngameCards(m_player1Id).size();
+  const int playerYShift = getChildByTag(m_playerLabelsTags[playerTagIdx(m_player1Id)])->getPositionY();
   for (size_t i = 0; i < cards.size(); ++i)
   {
-    auto label = Label::createWithTTF(cards[i]->toString(), "fonts/arial.ttf", TITLE_FONT_SIZE);
-    label->setPosition(origin.x + visibleSize.width / 2,
-      origin.y + visibleSize.height - (2 + i) * label->getContentSize().height);
-    label->setColor(Color3B::RED);
+    auto label = Label::createWithTTF(cards[i]->toString(), "fonts/arial.ttf", TITLE_FONT_SIZE / 2);
+    label->setPosition(m_player1GroupShift.x,
+      m_player1GroupShift.y - (alreadyDealtCards + i + 2) * label->getContentSize().height);
+    label->setColor(Color3B::WHITE);
 
-    m_cardLabelsTags.push_back(i);
-    this->addChild(label, 1, i);
+    int currTag = m_cPlayer1CardsStartTag + alreadyDealtCards + i;
+    m_cardLabelsTagsPlayer1.push_back(currTag);
+    this->addChild(label, 1, currTag);
+  }
+}
+
+void HelloWorld::drawSecondPlayerCards(const IDeck::CardsList& cards)
+{
+  const auto visibleSize = Director::getInstance()->getVisibleSize();
+  const auto origin = Director::getInstance()->getVisibleOrigin();
+
+  const int alreadyDealtCards = m_pGameController->playerIngameCards(m_player2Id).size();
+  const int playerYShift = getChildByTag(m_playerLabelsTags[playerTagIdx(m_player2Id)])->getPositionY();
+  for (size_t i = 0; i < cards.size(); ++i)
+  {
+    auto label = Label::createWithTTF(cards[i]->toString(), "fonts/arial.ttf", TITLE_FONT_SIZE / 2);
+    label->setPosition(m_player2GroupShift.x,
+      m_player2GroupShift.y - (alreadyDealtCards + i + 2) * label->getContentSize().height);
+    label->setColor(Color3B::WHITE);
+
+    int currTag = m_cPlayer1CardsStartTag + alreadyDealtCards + i;
+    m_cardLabelsTagsPlayer2.push_back(currTag);
+    this->addChild(label, 1, currTag);
   }
 }
 
 void HelloWorld::clearCards()
 {
-  for (auto cardTag : m_cardLabelsTags)
+  for (auto cardTag : m_cardLabelsTagsPlayer1)
     removeChildByTag(cardTag);
-  m_cardLabelsTags.clear();
+  m_cardLabelsTagsPlayer1.clear();
+  
+  for (auto cardTag : m_cardLabelsTagsPlayer2)
+    removeChildByTag(cardTag);
+  m_cardLabelsTagsPlayer2.clear();
+
+  for (auto cardTag : m_cardLabelsTagsPlayer3)
+    removeChildByTag(cardTag);
+  m_cardLabelsTagsPlayer3.clear();
 }
 
 void HelloWorld::drawGameFinished()
@@ -142,9 +231,9 @@ void HelloWorld::drawGameFinished()
   const auto visibleSize = Director::getInstance()->getVisibleSize();
   const auto origin = Director::getInstance()->getVisibleOrigin();
 
-  auto label = Label::createWithTTF("Game is finished", "fonts/arial.ttf", TITLE_FONT_SIZE);
+  auto label = Label::createWithTTF("Game has finished", "fonts/arial.ttf", TITLE_FONT_SIZE);
   label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - label->getContentSize().height);
-  label->setColor(Color3B::WHITE);
+  label->setColor(Color3B::RED);
   addChild(label, 1, m_gameIsFinishedTag);
 }
 

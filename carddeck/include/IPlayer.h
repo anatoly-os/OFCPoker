@@ -17,6 +17,14 @@ namespace CPoker
 
     struct ID
     {
+      ID()
+        : ID(0)
+      {}
+
+      explicit ID(int inId)
+        : id(inId)
+      {}
+
       int id = 0;
 
       inline bool operator==(const ID& playerId) const
@@ -43,6 +51,6 @@ namespace CPoker
     virtual void setBottomRowCards(const IDeck::CardsList&) = 0;
     virtual void setFoldZoneCards(const IDeck::CardsList&) = 0;
 
-    virtual int ingameCardsCount() const = 0;
+    virtual IDeck::CardsList ingameCards() const = 0;
   };
 }

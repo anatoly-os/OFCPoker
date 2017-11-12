@@ -17,9 +17,11 @@ namespace CPoker
 
     Round round() const override;
     IPlayer::ID activePlayer() const override;
-    IDeck::CardsList getCardsForActivePlayer() const override;
+    IDeck::CardsList dealCardsForActivePlayer() const override;
 
-    virtual void playerFinished(const IDeck::CardsList&) override;
+    IDeck::CardsList playerIngameCards(const IPlayer::ID&) const override;
+
+    void playerFinished(const IDeck::CardsList&) override;
 
   private:
     Round nextRound();

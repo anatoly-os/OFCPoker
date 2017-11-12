@@ -57,7 +57,10 @@ void CPoker::Player::setFoldZoneCards(const IDeck::CardsList& cards)
   m_foldZone.insert(m_foldZone.end(), cards.begin(), cards.end());
 }
 
-int CPoker::Player::ingameCardsCount() const
+IDeck::CardsList CPoker::Player::ingameCards() const
 {
-  return m_top.size() + m_mid.size() + m_bottom.size();
+  IDeck::CardsList cards{ m_top };
+  cards.insert(cards.end(), m_mid.begin(), m_mid.end());
+  cards.insert(cards.end(), m_bottom.begin(), m_bottom.end());
+  return cards;
 }

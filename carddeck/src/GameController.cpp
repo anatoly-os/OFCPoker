@@ -50,14 +50,14 @@ IPlayer::ID CPoker::GameController::activePlayer() const
   return m_activePlayer;
 }
 
-IDeck::CardsList CPoker::GameController::getCardsForActivePlayer() const
+IDeck::CardsList CPoker::GameController::dealCardsForActivePlayer() const
 {
   switch (m_round)
   {
+  case Round::Fantasy:
+    return m_pDeck->deal(14);
   case Round::FiveCards:
-  {
     return m_pDeck->deal(5);
-  }
   case Round::ThreeCards1:
   case Round::ThreeCards2:
   case Round::ThreeCards3:
@@ -66,6 +66,18 @@ IDeck::CardsList CPoker::GameController::getCardsForActivePlayer() const
   default:
     return IDeck::CardsList();
   }
+}
+
+IDeck::CardsList CPoker::GameController::playerIngameCards(const IPlayer::ID& playerId) const
+{
+  if (playerId == m_pPlayer1->id())
+    return m_pPlayer1->ingameCards();
+  else if (playerId == m_pPlayer2->id())
+    return m_pPlayer2->ingameCards();
+  else if (playerId == m_pPlayer3->id())
+    return m_pPlayer3->ingameCards();
+
+  return IDeck::CardsList();
 }
 
 void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
@@ -83,40 +95,38 @@ void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
     m_activePlayer = m_pPlayer1->id();
   }
   
+  const int ingameCardsCountPlr1 = m_pPlayer1->ingameCards().size();
+  const int ingameCardsCountPlr2 = m_pPlayer2->ingameCards().size();
+  //5, 8, 11, 14, 17 are here since GUI testing is in progress
   switch (m_round)
   {
   case Round::FiveCards:
   {
-    if (m_pPlayer1->ingameCardsCount() == 5 &&
-        m_pPlayer2->ingameCardsCount() == 5)
+    if (ingameCardsCountPlr1 == 5 && ingameCardsCountPlr2 == 5)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards1:
   {
-    if (m_pPlayer1->ingameCardsCount() == 7 &&
-      m_pPlayer2->ingameCardsCount() == 7)
+    if (ingameCardsCountPlr1 == 8 && ingameCardsCountPlr2 == 8)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards2:
   {
-    if (m_pPlayer1->ingameCardsCount() == 9 &&
-      m_pPlayer2->ingameCardsCount() == 9)
+    if (ingameCardsCountPlr1 == 11 && ingameCardsCountPlr2 == 11)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards3:
   {
-    if (m_pPlayer1->ingameCardsCount() == 11 &&
-      m_pPlayer2->ingameCardsCount() == 11)
+    if (ingameCardsCountPlr1 == 14 && ingameCardsCountPlr2 == 14)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards4:
   {
-    if (m_pPlayer1->ingameCardsCount() == 13 &&
-      m_pPlayer2->ingameCardsCount() == 13)
+    if (ingameCardsCountPlr1 == 17 && ingameCardsCountPlr2 == 17)
       m_round = nextRound();
     break;
   }

@@ -30,9 +30,14 @@ private:
   /////////
 
   //GUI
-  void drawActivePlayer();
-  void clearActivePlayer();
-  void drawCards(const CPoker::IDeck::CardsList& cards);
+  void drawPlayers();
+  void drawFirstPlayer(bool isActive);
+  void drawSecondPlayer(bool isActive);
+  void highlightActivePlayer();
+  int playerTagIdx(const CPoker::IPlayer::ID & id);
+  void clearPlayer(const CPoker::IPlayer::ID & id);
+  void drawFirstPlayerCards(const CPoker::IDeck::CardsList& cards);
+  void drawSecondPlayerCards(const CPoker::IDeck::CardsList & cards);
   void clearCards();
   void drawGameFinished();
   void clearGameFinished();
@@ -46,17 +51,31 @@ private:
   std::unique_ptr<CPoker::IGameController> m_pGameController;
   
   //dummy players (switch to ID in future and ask ID from server during connect routine)
-  std::unique_ptr<CPoker::IPlayer> m_pPlayer1;
-  std::unique_ptr<CPoker::IPlayer> m_pPlayer2;
+  CPoker::IPlayer::ID m_player1Id;
+  CPoker::IPlayer::ID m_player2Id;
 
   CPoker::IDeck::CardsList m_chosenCards;
 
-  std::vector<int> m_cardLabelsTags;
-  const int m_playerLabelTag = 100;
-  const int m_gameIsFinishedTag = 1000;
+  //0-99
+  const int m_cPlayer1CardsStartTag = 0;
+  std::vector<int> m_cardLabelsTagsPlayer1;
+  //100-199
+  const int m_cPlayer2CardsStartTag = 100; 
+  std::vector<int> m_cardLabelsTagsPlayer2;
+  //200-299
+  const int m_cplayer3CardsStartTag = 200;
+  std::vector<int> m_cardLabelsTagsPlayer3;
+  //1000-9999
+  std::vector<int> m_playerLabelsTags;
+  //10000-99999
+  const int m_gameIsFinishedTag = 10000;
 
   cocos2d::MenuItemImage* m_pNextMoveMenuItem;
   cocos2d::MenuItemImage* m_pStartGameMenuItem;
+  const int m_cPlayerGroupShiftX = 70; //TODO: replace with resolution dependent value
+  const int m_cPlayerGroupShiftY = 30; //TODO: replace with resolution dependent value
+  cocos2d::Vec2 m_player1GroupShift;
+  cocos2d::Vec2 m_player2GroupShift;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

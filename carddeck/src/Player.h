@@ -23,7 +23,7 @@ namespace CPoker
     virtual void setBottomRowCards(const IDeck::CardsList&) override;
     virtual void setFoldZoneCards(const IDeck::CardsList&) override;
 
-    int ingameCardsCount() const override;
+    IDeck::CardsList ingameCards() const override;
 
   private:
     IPlayer::ID m_id;
