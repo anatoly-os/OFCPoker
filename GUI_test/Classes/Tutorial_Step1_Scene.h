@@ -30,7 +30,6 @@ private:
   cocos2d::Sprite* m_pDealtCardFront;
 
   const int m_cFramePadding = 10;
-  const float m_cFlipTime = 0.25f;
 };
 
 #endif // __TUTORIAL1_SCENE_H__

@@ -1,4 +1,5 @@
 #include "Tutorial_Step1_Scene.h"
+#include "GUICardDealer.h"
 
 USING_NS_CC;
 
@@ -68,73 +69,60 @@ void TutorialStep1::drawDeck()
 void TutorialStep1::dealCard()
 {
   drawCardBack();
-  m_pDealtCardBack->setVisible(true);
-
   drawCardFront();
-  m_pDealtCardFront->setVisible(false);
-
   animateCardDealing();
 }
 
 void TutorialStep1::drawCardBack()
 {
+  if (!m_pDealtCardBack)
+  {
+    m_pDealtCardBack = Sprite::create(
+      "cards_back.png"
+    );
+    addChild(m_pDealtCardBack, 3);
+  }
+
   auto visibleSize = Director::getInstance()->getVisibleSize();
   auto origin = Director::getInstance()->getVisibleOrigin();
-
-  m_pDealtCardBack = Sprite::create(
-    "cards_back.png"
-  );
-
   m_pDealtCardBack->setPosition(origin.x + Vec2(m_pDealtCardBack->getContentSize() / 2).x + m_cFramePadding,
     origin.y + Vec2(visibleSize).y - Vec2(m_pDealtCardBack->getContentSize() / 2).y - m_cFramePadding);
-
-  addChild(m_pDealtCardBack, 3);
 }
 
 void TutorialStep1::drawCardFront()
 {
-  m_pDealtCardFront = Sprite::create(
-    "cards_Ah.png"
-  );
+  if (!m_pDealtCardFront)
+  {
+    m_pDealtCardFront = Sprite::create(
+      "cards_Ah.png"
+    );
+    addChild(m_pDealtCardFront, 4);
+  }
 
   auto origin = Director::getInstance()->getVisibleOrigin();
   auto visibleSize = Director::getInstance()->getVisibleSize();
-
   m_pDealtCardFront->setPosition(origin.x + Vec2(visibleSize).x / 2,
     origin.y + Vec2(visibleSize).y - Vec2(m_pDealtCardFront->getContentSize() / 2).y - m_cFramePadding);
-  m_pDealtCardFront->setRotation3D(Vec3(0, 90.0f, 0));
-  m_pDealtCardFront->setFlippedX(true);
-
-  addChild(m_pDealtCardFront, 4);
 }
 
 void TutorialStep1::animateCardDealing()
 {
-  auto visibleSize = Director::getInstance()->getVisibleSize();
-
   auto disableDealBtn = CallFunc::create([this]()
   {
     m_pDealCardMenuItem->setEnabled(false);
   });
-  auto backMoveBy = MoveTo::create(m_cFlipTime, Vec2(Vec2(visibleSize).x / 2, m_pDealtCardBack->getPositionY()));
-  auto backRotateBy = RotateBy::create(m_cFlipTime, Vec3(0, 90.0f, 0));
-  auto backSpawner = Spawn::create(backMoveBy, backRotateBy, nullptr);
-  auto afterBackFinished = CallFunc::create([this]()
-  {
-    m_pDealtCardBack->setVisible(false);
-    m_pDealtCardFront->setVisible(true);
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto frontMoveBy = MoveTo::create(m_cFlipTime, Vec2(Vec2(visibleSize).x - m_cFramePadding - Vec2(m_pDealtCardFront->getContentSize()).x / 2, m_pDealtCardFront->getPositionY()));
-    auto frontRotateBy = RotateBy::create(m_cFlipTime, Vec3(0, 90.0f, 0));
-    auto enableDealBtn = CallFunc::create([this]()
-    {
-      m_pDealCardMenuItem->setEnabled(true);
-    });
-    auto frontSpawner = Spawn::create(frontMoveBy, frontRotateBy, nullptr);
-    auto frontSequence = Sequence::create(frontSpawner, enableDealBtn, nullptr);
-    m_pDealtCardFront->runAction(frontSequence);
+  auto origin = Director::getInstance()->getVisibleOrigin();
+  auto visibleSize = Director::getInstance()->getVisibleSize();
+  Vec2 startPosition = m_pDealtCardBack->getPosition();
+  Vec2 endPosition = m_pDealtCardBack->getPosition() + Vec2(Vec2(visibleSize).x - 2 * m_cFramePadding - Vec2(m_pDealtCardBack->getContentSize()).x, 0);
+  auto dealActions = CPoker::GUICardDealer::dealCard(m_pDealtCardFront, m_pDealtCardBack, startPosition, endPosition);
+
+  auto enableDealBtn = CallFunc::create([this]()
+  {
+    m_pDealCardMenuItem->setEnabled(true);
   });
-  auto backSequence = Sequence::create(disableDealBtn, backSpawner, afterBackFinished, nullptr);
-  m_pDealtCardBack->runAction(backSequence);
+  auto sequence = Sequence::create(disableDealBtn, dealActions, enableDealBtn, nullptr);
+
+  m_pDealtCardBack->runAction(sequence);
 }
