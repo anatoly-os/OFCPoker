@@ -26,7 +26,7 @@ private:
 
 private:
   cocos2d::MenuItemImage* m_pDealCardMenuItem;
-  cocos2d::Sprite* m_pDealtCardBack;
+  std::vector<cocos2d::Sprite*> m_pDealtCardsBack;
   std::vector<cocos2d::Sprite*> m_pDealtCardsFront;
 
   const int m_cFramePadding = 10;
