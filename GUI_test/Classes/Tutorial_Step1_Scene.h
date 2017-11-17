@@ -21,13 +21,13 @@ private:
   void drawDealButton();
   void drawDeck();
   void drawCardBack();
-  void drawCardFront();
+  void drawCardFront(bool visible);
   void animateCardDealing();
 
 private:
   cocos2d::MenuItemImage* m_pDealCardMenuItem;
   cocos2d::Sprite* m_pDealtCardBack;
-  cocos2d::Sprite* m_pDealtCardFront;
+  std::vector<cocos2d::Sprite*> m_pDealtCardsFront;
 
   const int m_cFramePadding = 10;
 };

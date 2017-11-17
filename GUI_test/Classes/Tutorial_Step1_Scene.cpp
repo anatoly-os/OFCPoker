@@ -69,7 +69,7 @@ void TutorialStep1::drawDeck()
 void TutorialStep1::dealCard()
 {
   drawCardBack();
-  drawCardFront();
+  drawCardFront(false);
   animateCardDealing();
 }
 
@@ -80,7 +80,7 @@ void TutorialStep1::drawCardBack()
     m_pDealtCardBack = Sprite::create(
       "cards_back.png"
     );
-    addChild(m_pDealtCardBack, 3);
+    addChild(m_pDealtCardBack, 10);
   }
 
   auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -89,20 +89,27 @@ void TutorialStep1::drawCardBack()
     origin.y + Vec2(visibleSize).y - Vec2(m_pDealtCardBack->getContentSize() / 2).y - m_cFramePadding);
 }
 
-void TutorialStep1::drawCardFront()
+void TutorialStep1::drawCardFront(bool visible)
 {
-  if (!m_pDealtCardFront)
+  if (m_pDealtCardsFront.empty())
   {
-    m_pDealtCardFront = Sprite::create(
-      "cards_Ah.png"
-    );
-    addChild(m_pDealtCardFront, 4);
+    m_pDealtCardsFront.resize(3);
+    m_pDealtCardsFront[0] = Sprite::create("cards_Ah.png");
+    m_pDealtCardsFront[1] = Sprite::create("cards_Ah.png");
+    m_pDealtCardsFront[2] = Sprite::create("cards_Ah.png");
+    addChild(m_pDealtCardsFront[0], 4);
+    addChild(m_pDealtCardsFront[1], 5);
+    addChild(m_pDealtCardsFront[2], 6);
   }
 
   auto origin = Director::getInstance()->getVisibleOrigin();
   auto visibleSize = Director::getInstance()->getVisibleSize();
-  m_pDealtCardFront->setPosition(origin.x + Vec2(visibleSize).x / 2,
-    origin.y + Vec2(visibleSize).y - Vec2(m_pDealtCardFront->getContentSize() / 2).y - m_cFramePadding);
+  for (auto sprite : m_pDealtCardsFront)
+  {
+    sprite->setPosition(origin.x + Vec2(visibleSize).x / 2,
+      origin.y + Vec2(visibleSize).y - Vec2(sprite->getContentSize() / 2).y - m_cFramePadding);
+    sprite->setVisible(visible);
+  }
 }
 
 void TutorialStep1::animateCardDealing()
@@ -116,13 +123,14 @@ void TutorialStep1::animateCardDealing()
   auto visibleSize = Director::getInstance()->getVisibleSize();
   Vec2 startPosition = m_pDealtCardBack->getPosition();
   Vec2 endPosition = m_pDealtCardBack->getPosition() + Vec2(Vec2(visibleSize).x - 2 * m_cFramePadding - Vec2(m_pDealtCardBack->getContentSize()).x, 0);
-  auto dealActions = CPoker::GUICardDealer::dealCard(m_pDealtCardFront, m_pDealtCardBack, startPosition, endPosition);
-
+  auto deal1Actions = CPoker::GUICardDealer::dealCard(m_pDealtCardsFront[0], m_pDealtCardBack, startPosition, endPosition);
+  auto deal2Actions = CPoker::GUICardDealer::dealCard(m_pDealtCardsFront[1], m_pDealtCardBack, startPosition, endPosition - Vec2(50, 0));
+  auto deal3Actions = CPoker::GUICardDealer::dealCard(m_pDealtCardsFront[2], m_pDealtCardBack, startPosition, endPosition - Vec2(100, 0));
   auto enableDealBtn = CallFunc::create([this]()
   {
     m_pDealCardMenuItem->setEnabled(true);
   });
-  auto sequence = Sequence::create(disableDealBtn, dealActions, enableDealBtn, nullptr);
+  auto sequence = Sequence::create(disableDealBtn, deal1Actions, deal2Actions, deal3Actions, enableDealBtn, nullptr);
 
   m_pDealtCardBack->runAction(sequence);
 }
