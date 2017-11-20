@@ -97,7 +97,6 @@ void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
   
   const int ingameCardsCountPlr1 = m_pPlayer1->ingameCards().size();
   const int ingameCardsCountPlr2 = m_pPlayer2->ingameCards().size();
-  //5, 8, 11, 14, 17 are here since GUI testing is in progress
   switch (m_round)
   {
   case Round::FiveCards:
@@ -108,25 +107,25 @@ void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
   }
   case Round::ThreeCards1:
   {
-    if (ingameCardsCountPlr1 == 8 && ingameCardsCountPlr2 == 8)
+    if (ingameCardsCountPlr1 == 7 && ingameCardsCountPlr2 == 7)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards2:
   {
-    if (ingameCardsCountPlr1 == 11 && ingameCardsCountPlr2 == 11)
+    if (ingameCardsCountPlr1 == 9 && ingameCardsCountPlr2 == 9)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards3:
   {
-    if (ingameCardsCountPlr1 == 14 && ingameCardsCountPlr2 == 14)
+    if (ingameCardsCountPlr1 == 11 && ingameCardsCountPlr2 == 11)
       m_round = nextRound();
     break;
   }
   case Round::ThreeCards4:
   {
-    if (ingameCardsCountPlr1 == 17 && ingameCardsCountPlr2 == 17)
+    if (ingameCardsCountPlr1 == 13 && ingameCardsCountPlr2 == 13)
       m_round = nextRound();
     break;
   }

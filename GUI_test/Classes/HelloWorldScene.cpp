@@ -1,8 +1,7 @@
 #include "HelloWorldScene.h"
 #include "AppMacros.h"
 
-#include "carddeck\src\GameController.h"
-#include "carddeck\src\Player.h"
+#include "carddeck\include\GameControllerCreator.h"
 
 USING_NS_CC;
 
@@ -19,7 +18,7 @@ bool HelloWorld::init()
         return false;
     
     //init game server (connect to one in future)
-    m_pGameController.reset(new GameController());
+    m_pGameController = GameControllerCreator::create();
     m_playerLabelsTags.resize(3);
     /////////////////////////////////////////////
 
