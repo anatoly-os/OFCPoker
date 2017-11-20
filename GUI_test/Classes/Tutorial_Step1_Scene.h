@@ -24,10 +24,17 @@ private:
   void drawCardFront(bool visible);
   void animateCardDealing();
 
+  void initializeTouchListeners();
+  bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
+  void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
+  void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
+
 private:
   cocos2d::MenuItemImage* m_pDealCardMenuItem;
   std::vector<cocos2d::Sprite*> m_pDealtCardsBack;
   std::vector<cocos2d::Sprite*> m_pDealtCardsFront;
+  cocos2d::Vec2 m_movedSpriteInitPosition;
+  cocos2d::Vec2 m_initialTouchPosition;
 
   const int m_cFramePadding = 10;
 };

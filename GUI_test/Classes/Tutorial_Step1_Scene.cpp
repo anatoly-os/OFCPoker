@@ -16,7 +16,7 @@ bool TutorialStep1::init()
   drawBackground();
   drawDealButton();
   drawDeck();
-  
+
   return true;
 }
 
@@ -71,6 +71,7 @@ void TutorialStep1::dealCard()
   drawCardBack();
   drawCardFront(false);
   animateCardDealing();
+  initializeTouchListeners();
 }
 
 void TutorialStep1::drawCardBack()
@@ -144,4 +145,40 @@ void TutorialStep1::animateCardDealing()
   m_pDealtCardsBack[0]->runAction(sequence1);
   m_pDealtCardsBack[1]->runAction(sequence2);
   m_pDealtCardsBack[2]->runAction(sequence3);
+}
+
+void TutorialStep1::initializeTouchListeners()
+{
+  auto eventListener = EventListenerTouchOneByOne::create();
+  eventListener->setSwallowTouches(true);
+  eventListener->onTouchBegan = CC_CALLBACK_2(TutorialStep1::onTouchBegan, this);
+  eventListener->onTouchMoved = CC_CALLBACK_2(TutorialStep1::onTouchMoved, this);
+  eventListener->onTouchEnded = CC_CALLBACK_2(TutorialStep1::onTouchEnded, this);
+
+  _eventDispatcher->addEventListenerWithSceneGraphPriority(eventListener, m_pDealtCardsFront[0]);
+  _eventDispatcher->addEventListenerWithSceneGraphPriority(eventListener->clone(), m_pDealtCardsFront[1]);
+  _eventDispatcher->addEventListenerWithSceneGraphPriority(eventListener->clone(), m_pDealtCardsFront[2]);
+}
+
+bool TutorialStep1::onTouchBegan(Touch * touch, Event * event)
+{
+  auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
+  if (!activeSprite->getBoundingBox().containsPoint(touch->getLocation()))
+    return false;
+
+  m_movedSpriteInitPosition = activeSprite->getPosition();
+  m_initialTouchPosition = touch->getLocation();
+  return true;
+}
+
+void TutorialStep1::onTouchMoved(Touch * touch, Event * event)
+{
+  auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
+  activeSprite->setPosition(m_movedSpriteInitPosition + touch->getLocation() - m_initialTouchPosition);
+}
+
+void TutorialStep1::onTouchEnded(Touch * touch, Event * event)
+{
+  auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
+  activeSprite->setPosition(m_movedSpriteInitPosition);
 }

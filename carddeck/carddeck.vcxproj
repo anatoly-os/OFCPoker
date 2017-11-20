@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\GameControllerCreator.h" />
     <ClInclude Include="include\ICard.h" />
     <ClInclude Include="include\IPlayer.h" />
     <ClInclude Include="include\IGameController.h" />
@@ -131,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameController.cpp" />
+    <ClCompile Include="src\GameControllerCreator.cpp" />
     <ClCompile Include="src\NamesHelper.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\PokerCard.cpp" />
