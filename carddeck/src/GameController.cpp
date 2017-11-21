@@ -22,11 +22,9 @@ void CPoker::GameController::startGame(const std::vector<IPlayer::ID>& ids)
   m_round = IGameController::Round::WaitGameStart;
 
   m_pPlayer1.reset(new Player(ids[0].id));
-  m_pPlayer2.reset(new Player(ids[1].id));
   m_button = m_pPlayer1->id();
-  m_activePlayer = m_pPlayer2->id();
+  m_activePlayer = m_pPlayer1->id();
   //temp double nextRound() to skip fantasy
-  m_round = nextRound();
   m_round = nextRound();
 }
 
@@ -82,8 +80,10 @@ IDeck::CardsList CPoker::GameController::playerIngameCards(const IPlayer::ID& pl
 
 void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
 {
-  //test case - add all cards to the top row
-  //test case - no fantasies so active player is next player
+  //temp decision for 1st MVP
+  m_pPlayer1->setTopRowCards(chosenCards);
+
+  /*
   if (m_pPlayer1->id() == activePlayer())
   {
     m_pPlayer1->setTopRowCards(chosenCards);
@@ -94,7 +94,29 @@ void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
     m_pPlayer2->setTopRowCards(chosenCards);
     m_activePlayer = m_pPlayer1->id();
   }
-  
+  */
+
+  //temp decision for 1st MVP
+  const int ingameCardsCountPlr1 = m_pPlayer1->ingameCards().size();
+  switch (m_round)
+  {
+  case Round::ThreeCards1:
+  {
+    if (ingameCardsCountPlr1 == 2)
+      m_round = nextRound();
+    break;
+  }
+  case Round::ThreeCards2:
+  {
+    if (ingameCardsCountPlr1 == 3)
+      m_round = nextRound();
+    break;
+  }
+  default:
+    m_round = nextRound();
+  }
+
+  /*
   const int ingameCardsCountPlr1 = m_pPlayer1->ingameCards().size();
   const int ingameCardsCountPlr2 = m_pPlayer2->ingameCards().size();
   switch (m_round)
@@ -132,10 +154,21 @@ void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
   default:
     m_round = nextRound();
   }
+  */
 }
 
 CPoker::IGameController::Round CPoker::GameController::nextRound()
 {
+  //temp decision for 1st MVP
+  switch (m_round)
+  {
+  case Round::WaitGameStart: return Round::ThreeCards1;
+  case Round::ThreeCards1: return Round::ThreeCards2;
+  case Round::WaitPostGameFinish: return Round::WaitGameStart;
+  default:
+    return Round::WaitGameStart;
+  }
+  /*
   switch (m_round)
   {
   case Round::WaitGameStart: return Round::Fantasy;
@@ -149,4 +182,5 @@ CPoker::IGameController::Round CPoker::GameController::nextRound()
   default:
     return Round::WaitGameStart;
   }
+  */
 }

@@ -1,6 +1,12 @@
 #include "Tutorial_Step1_Scene.h"
 #include "GUICardDealer.h"
 
+#include "carddeck\include\GameControllerCreator.h"
+#include "carddeck\include\IPlayer.h"
+#include "carddeck\include\IDeck.h"
+
+#include <future>
+
 USING_NS_CC;
 
 Scene * TutorialStep1::scene()
@@ -13,9 +19,14 @@ bool TutorialStep1::init()
   if (!Scene::init())
     return false;
 
+  m_pGameController = CPoker::GameControllerCreator::create();
+  m_playerId = CPoker::IPlayer::ID(1);
+
   drawBackground();
   drawDeck();
   drawCardHolders();
+
+  drawButtons();
 
   return true;
 }
@@ -35,21 +46,10 @@ void TutorialStep1::drawDeck()
   auto visibleSize = Director::getInstance()->getVisibleSize();
   auto origin = Director::getInstance()->getVisibleOrigin();
 
-  m_pCardDeck = MenuItemImage::create("cards_back.png", "cards_back.png", CC_CALLBACK_0(TutorialStep1::dealCard, this));
+  m_pCardDeck = Sprite::create("cards_back.png");
   m_pCardDeck->setPosition(origin.x + Vec2(m_pCardDeck->getContentSize() / 2).x + m_cFramePadding,
     origin.y + Vec2(visibleSize).y - Vec2(m_pCardDeck->getContentSize() / 2).y - m_cFramePadding);
-
-  auto menuRun = Menu::create(m_pCardDeck, nullptr);
-  menuRun->setPosition(Vec2::ZERO);
-  addChild(menuRun, 2);
-}
-
-//cb
-void TutorialStep1::dealCard()
-{
-  drawCardBack();
-  drawCardFront();
-  animateCardDealing();
+  addChild(m_pCardDeck, 2);
 }
 
 void TutorialStep1::drawCardBack()
@@ -73,17 +73,21 @@ void TutorialStep1::drawCardBack()
   }
 }
 
-void TutorialStep1::drawCardFront()
+void TutorialStep1::drawCardFront(const CPoker::IDeck::CardsList& cards)
 {
   if (m_pDealtCardsFront.empty())
   {
-    m_pDealtCardsFront.resize(3);
-
-    m_pDealtCardsFront[0] = Sprite::create("cards_Ah.png");
-    m_pDealtCardsFront[1] = Sprite::create("cards_Kh.png");
-    m_pDealtCardsFront[2] = Sprite::create("cards_Qh.png");
-    for (auto& sprite : m_pDealtCardsFront)
-      addChild(sprite, 5);   
+    m_pDealtCardsFront.resize(cards.size());
+    for (size_t i = 0; i < m_pDealtCardsFront.size(); ++i)
+    {
+      m_pDealtCardsFront[i] = Sprite::create(std::string("cards_") + cards[i]->toString() + std::string(".png"));
+      addChild(m_pDealtCardsFront[i], 5);
+    }
+  }
+  else
+  {
+    for (size_t i = 0; i < m_pDealtCardsFront.size(); ++i)
+      m_pDealtCardsFront[i]->setTexture(std::string("cards_") + cards[i]->toString() + std::string(".png"));
   }
 
   auto origin = Director::getInstance()->getVisibleOrigin();
@@ -96,13 +100,18 @@ void TutorialStep1::drawCardFront()
   }
 
   //find proper place for event listeners initialization
-  m_pTouchEventListener = EventListenerTouchOneByOne::create();
-  m_pTouchEventListener->setSwallowTouches(true);
-  m_pTouchEventListener->onTouchBegan = CC_CALLBACK_2(TutorialStep1::onTouchBegan, this);
-  m_pTouchEventListener->onTouchMoved = CC_CALLBACK_2(TutorialStep1::onTouchMoved, this);
-  m_pTouchEventListener->onTouchEnded = CC_CALLBACK_2(TutorialStep1::onTouchEnded, this);
+  if (!m_pTouchEventListener)
+  {
+    m_pTouchEventListener = EventListenerTouchOneByOne::create();
+    m_pTouchEventListener->setSwallowTouches(true);
+    m_pTouchEventListener->onTouchBegan = CC_CALLBACK_2(TutorialStep1::onTouchBegan, this);
+    m_pTouchEventListener->onTouchMoved = CC_CALLBACK_2(TutorialStep1::onTouchMoved, this);
+    m_pTouchEventListener->onTouchEnded = CC_CALLBACK_2(TutorialStep1::onTouchEnded, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener, m_pDealtCardsFront[0]);
+  }
+  else
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), m_pDealtCardsFront[0]);
 
-  _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener, m_pDealtCardsFront[0]);
   _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), m_pDealtCardsFront[1]);
   _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), m_pDealtCardsFront[2]);
 }
@@ -161,6 +170,47 @@ void TutorialStep1::drawCardHolders()
   }
 }
 
+void TutorialStep1::drawNewGameButton()
+{
+  m_pNewGameButton = MenuItemImage::create(
+    "NewGame.png",
+    "NewGame.png",
+    "NewGame_dis.png",
+    CC_CALLBACK_0(TutorialStep1::startGame, this));
+
+  m_pNewGameButton->setPosition(m_pReadyButton->getPositionX(), m_pReadyButton->getPositionY() + Vec2(m_pNewGameButton->getContentSize()).y + m_cFramePadding);
+
+  auto menu = Menu::create(m_pNewGameButton, nullptr);
+  menu->setPosition(Vec2::ZERO);
+  addChild(menu, 1000);
+}
+
+void TutorialStep1::drawReadyButton()
+{
+  m_pReadyButton = MenuItemImage::create(
+    "Ready.png",
+    "Ready.png",
+    "Ready_dis.png",
+    CC_CALLBACK_0(TutorialStep1::playerIsReady, this));
+
+  auto visibleSize = Director::getInstance()->getVisibleSize();
+  auto origin = Director::getInstance()->getVisibleOrigin();
+  m_pReadyButton->setPosition(origin.x + Vec2(visibleSize).x - Vec2(m_pReadyButton->getContentSize() / 2).x - m_cFramePadding,
+    origin.y + Vec2(m_pReadyButton->getContentSize() / 2).y + 2 * m_cFramePadding);
+  m_pReadyButton->setEnabled(false);
+
+  auto menu = Menu::create(m_pReadyButton, nullptr);
+  menu->setPosition(Vec2::ZERO);
+  addChild(menu, 1000);
+}
+
+void TutorialStep1::drawButtons()
+{
+  //order matters! positions depend on previously added buttons
+  drawReadyButton();
+  drawNewGameButton();
+}
+
 bool TutorialStep1::onTouchBegan(Touch * touch, Event * event)
 {
   auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
@@ -214,4 +264,42 @@ void TutorialStep1::onTouchEnded(Touch * touch, Event * event)
     holder[1]->setVisible(true);
     holder[2]->setVisible(false);
   }
+}
+
+void TutorialStep1::nextMove()
+{
+  if (m_pGameController->round() != CPoker::IGameController::Round::WaitPostGameFinish)
+  {
+    //deal cards
+    dealCards();
+    //wait for timer (or done button)
+  }
+  else
+  {
+    m_pNewGameButton->setEnabled(true);
+  }
+}
+
+void TutorialStep1::startGame()
+{
+  m_pNewGameButton->setEnabled(false);
+
+  std::vector<CPoker::IPlayer::ID> players{ m_playerId };
+  m_pGameController->startGame(players);
+  nextMove();
+}
+
+void TutorialStep1::playerIsReady()
+{
+  m_pReadyButton->setEnabled(false);
+  nextMove();
+}
+
+void TutorialStep1::dealCards()
+{
+  auto dealtCards = m_pGameController->dealCardsForActivePlayer();
+  drawCardBack();
+  drawCardFront(dealtCards);
+  animateCardDealing();
+  m_pReadyButton->setEnabled(true);
 }

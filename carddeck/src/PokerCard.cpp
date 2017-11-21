@@ -30,5 +30,5 @@ ICard::Value CPoker::PokerCard::value() const
 
 std::string CPoker::PokerCard::toString() const
 {
-  return NamesHelper::toString(m_value) + std::string(" Of ") + NamesHelper::toString(m_suit);
+  return NamesHelper::toString(m_value) + NamesHelper::toString(m_suit);
 }
