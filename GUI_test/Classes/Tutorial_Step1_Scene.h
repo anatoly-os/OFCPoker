@@ -45,8 +45,7 @@ private:
   void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
   void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
 
-  TutorialStep1::SpritePtr checkIntersectionWithPlayerHolders(SpritePtr pActiveCard);
-  TutorialStep1::SpritePtr checkIntersectionWithDealtCardsHolders(SpritePtr pActiveCard);
+  TutorialStep1::SpritePtr checkIntersection(SpritePtr pActiveCard, SpritesArray sprites);
 
   //logic
   void nextMove();
@@ -66,8 +65,8 @@ private:
   SpritesArray m_dealtCardsHolders;
   MenuItemPtr m_pNewGameButton;
   MenuItemPtr m_pReadyButton;
-  cocos2d::Vec2 m_movedSpriteInitPosition;
-  cocos2d::Vec2 m_initialTouchPosition;
+  cocos2d::Vec2 m_initialDragCardPosition;
+  cocos2d::Vec2 m_initialDragTouchPosition;
 
   cocos2d::EventListenerTouchOneByOne* m_pTouchEventListener;
   SpritePtr m_dummySpriteNotToReleaseTouchListener;

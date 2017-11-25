@@ -259,35 +259,23 @@ bool TutorialStep1::onTouchBegan(Touch * touch, Event * event)
   if (!activeSprite->getBoundingBox().containsPoint(touch->getLocation()))
     return false;
 
-  m_movedSpriteInitPosition = activeSprite->getPosition();
-  m_initialTouchPosition = touch->getLocation();
+  m_initialDragCardPosition = activeSprite->getPosition();
+  m_initialDragTouchPosition = touch->getLocation();
   activeSprite->setLocalZOrder(100);
   return true;
 }
 
-TutorialStep1::SpritePtr TutorialStep1::checkIntersectionWithPlayerHolders(SpritePtr pActiveCard)
+TutorialStep1::SpritePtr TutorialStep1::checkIntersection(SpritePtr pActiveCard, SpritesArray sprites)
 {
+  sprites.erase(pActiveCard);
+
   SpritePtr pHolderToPlaceIn = nullptr;
-  auto it = std::find_if(m_pCardsHolders.begin(), m_pCardsHolders.end(), [pActiveCard](auto& holder)
+  auto it = std::find_if(sprites.begin(), sprites.end(), [pActiveCard](auto& holder)
   {
     return pActiveCard->getBoundingBox().containsPoint(holder->getPosition());
   });
 
-  if (it != m_pCardsHolders.end())
-    pHolderToPlaceIn = *it;
-
-  return pHolderToPlaceIn;
-}
-
-TutorialStep1::SpritePtr TutorialStep1::checkIntersectionWithDealtCardsHolders(SpritePtr pActiveCard)
-{
-  SpritePtr pHolderToPlaceIn = nullptr;
-  auto it = std::find_if(m_dealtCardsHolders.begin(), m_dealtCardsHolders.end(), [pActiveCard](auto& holder)
-  {
-    return pActiveCard->getBoundingBox().containsPoint(holder->getPosition());
-  });
-
-  if (it != m_dealtCardsHolders.end())
+  if (it != sprites.end())
     pHolderToPlaceIn = *it;
 
   return pHolderToPlaceIn;
@@ -296,11 +284,11 @@ TutorialStep1::SpritePtr TutorialStep1::checkIntersectionWithDealtCardsHolders(S
 void TutorialStep1::onTouchMoved(Touch * touch, Event * event)
 {
   auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
-  activeSprite->setPosition(m_movedSpriteInitPosition + touch->getLocation() - m_initialTouchPosition);
+  activeSprite->setPosition(m_initialDragCardPosition + touch->getLocation() - m_initialDragTouchPosition);
 
-  auto pHolderToPlaceIn = checkIntersectionWithPlayerHolders(activeSprite);
+  auto pHolderToPlaceIn = checkIntersection(activeSprite, m_pCardsHolders);
   if (!pHolderToPlaceIn)
-    pHolderToPlaceIn = checkIntersectionWithDealtCardsHolders(activeSprite);
+    pHolderToPlaceIn = checkIntersection(activeSprite, m_dealtCardsHolders);
 
   if (pHolderToPlaceIn)
   {
@@ -315,18 +303,51 @@ void TutorialStep1::onTouchEnded(Touch * touch, Event * event)
 {
   auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
   
-  auto pHolderToPlaceIn = checkIntersectionWithPlayerHolders(activeSprite);
+  auto pHolderToPlaceIn = checkIntersection(activeSprite, m_pCardsHolders);
   if (pHolderToPlaceIn)
   {
-    activeSprite->setPosition(pHolderToPlaceIn->getPosition());
-    m_activePlayerCards.insert(activeSprite);
+    //if place card to card holder
+    //  if previously placed player card in cardholder: place active to initial position
+    //  else if active card in cardholder: swap active with underlying
+    //  else: place card to cardholder
+    if (checkIntersection(activeSprite, m_playerCards))
+      activeSprite->setPosition(m_initialDragCardPosition);
+    else
+    {
+      m_activePlayerCards.insert(activeSprite);
+      auto intersecedWithCard = checkIntersection(activeSprite, m_activePlayerCards);
+      if (intersecedWithCard)
+      {
+        activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+        intersecedWithCard->setPosition(m_initialDragCardPosition);
+        m_activePlayerCards.erase(intersecedWithCard);
+      }
+      else
+        activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+    }
   }
   else
   {
+    //place card not to placeholder
     m_activePlayerCards.erase(activeSprite);
-    pHolderToPlaceIn = checkIntersectionWithDealtCardsHolders(activeSprite);
+    pHolderToPlaceIn = checkIntersection(activeSprite, m_dealtCardsHolders);
     if (pHolderToPlaceIn)
-      activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+    {
+      //place card to dealt cards placeholder
+      //if intersects with dealt card: swap cards
+      //else: place
+      auto intersecedWithCard = checkIntersection(activeSprite, m_pDealtCardsFront);
+      if (intersecedWithCard)
+      {
+        activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+        intersecedWithCard->setPosition(m_initialDragCardPosition);
+      }
+      else
+        activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+    }
+    else
+      //no placeholders selected: place to initial position
+      activeSprite->setPosition(m_initialDragCardPosition);
   }
 
   if (m_pGameController->round() == CPoker::IGameController::Round::ThreeCards1 && m_activePlayerCards.size() == 2)
