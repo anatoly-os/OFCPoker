@@ -3,7 +3,7 @@
 using namespace CPoker;
 using namespace cocos2d;
 
-Action* CPoker::GUICardDealer::dealCard(Sprite * pFrontSprite,
+Sequence* CPoker::GUICardDealer::dealCard(Sprite * pFrontSprite,
   Sprite * pBackSprite,
   const cocos2d::Vec2 & start,
   const cocos2d::Vec2 & end)

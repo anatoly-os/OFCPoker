@@ -14,7 +14,7 @@ namespace CPoker
   class GUICardDealer
   {
   public:
-    static cocos2d::Action* dealCard(cocos2d::Sprite* pFrontSprite, cocos2d::Sprite* pBackSprite,
+    static cocos2d::Sequence* dealCard(cocos2d::Sprite* pFrontSprite, cocos2d::Sprite* pBackSprite,
       const cocos2d::Vec2& start, const cocos2d::Vec2& end);
   };
 }
