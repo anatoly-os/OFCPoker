@@ -4,11 +4,14 @@
 #include "cocos2d.h"
 
 #include "carddeck\include\IGameController.h"
+#include <utility>
 
 class TutorialStep1 : public cocos2d::Scene
 {
 public:
-  using SpritesArray = std::vector<cocos2d::Sprite*>;
+  using SpritesArray = std::set<cocos2d::Sprite*>;
+  using SpritePtr = cocos2d::Sprite*;
+  using MenuItemPtr = cocos2d::MenuItemImage*;
 
   virtual bool init() override;
 
@@ -25,17 +28,25 @@ private:
   //GUI
   void drawBackground();
   void drawDeck();
-  void drawCardBack();
-  void drawCardFront(const CPoker::IDeck::CardsList& cards);
+  void drawDealtCardsBack();
+  void drawDealtCardsFront(const CPoker::IDeck::CardsList& cards);
   void animateCardDealing();
   void drawCardHolders();
+  void drawPlayerCardsHolders();
+  void drawDealtCardsHolders();
+
+  void drawSelectFrame();
   void drawNewGameButton();
   void drawReadyButton();
   void drawButtons();
+  void clearCards();
 
   bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
   void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
   void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
+
+  TutorialStep1::SpritePtr checkIntersectionWithPlayerHolders(SpritePtr pActiveCard);
+  TutorialStep1::SpritePtr checkIntersectionWithDealtCardsHolders(SpritePtr pActiveCard);
 
   //logic
   void nextMove();
@@ -45,15 +56,21 @@ private:
   //GUI
   SpritesArray m_pDealtCardsBack;
   SpritesArray m_pDealtCardsFront;
-  //each card holder keeps 3 sprites: background with opacity, black frame and yellow frame
-  std::vector<SpritesArray> m_pCardsHolders;
-  cocos2d::Sprite* m_pCardDeck;
-  cocos2d::MenuItemImage* m_pNewGameButton;
-  cocos2d::MenuItemImage* m_pReadyButton;
+  std::map<SpritePtr, CPoker::ICard*> m_cardsConvertor;
+  SpritesArray m_playerCards;
+  SpritesArray m_activePlayerCards;
+  SpritesArray m_pCardsHolders;
+  SpritePtr m_pCardFrame;
+  SpritePtr m_pCardDeck;
+  SpritePtr m_dealtCardsLargeHolder;
+  SpritesArray m_dealtCardsHolders;
+  MenuItemPtr m_pNewGameButton;
+  MenuItemPtr m_pReadyButton;
   cocos2d::Vec2 m_movedSpriteInitPosition;
   cocos2d::Vec2 m_initialTouchPosition;
 
   cocos2d::EventListenerTouchOneByOne* m_pTouchEventListener;
+  SpritePtr m_dummySpriteNotToReleaseTouchListener;
   const int m_cFramePadding = 10;
 
   //backend data

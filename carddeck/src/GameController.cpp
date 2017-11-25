@@ -78,10 +78,10 @@ IDeck::CardsList CPoker::GameController::playerIngameCards(const IPlayer::ID& pl
   return IDeck::CardsList();
 }
 
-void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
+void CPoker::GameController::playerFinished(const IDeck::CardsList& top, const IDeck::CardsList& mid, const IDeck::CardsList& bottom)
 {
   //temp decision for 1st MVP
-  m_pPlayer1->setTopRowCards(chosenCards);
+  m_pPlayer1->insertTopRowCards(top);
 
   /*
   if (m_pPlayer1->id() == activePlayer())
@@ -108,7 +108,7 @@ void CPoker::GameController::playerFinished(const IDeck::CardsList& chosenCards)
   }
   case Round::ThreeCards2:
   {
-    if (ingameCardsCountPlr1 == 3)
+    if (ingameCardsCountPlr1 >= 3)
       m_round = nextRound();
     break;
   }
@@ -164,6 +164,7 @@ CPoker::IGameController::Round CPoker::GameController::nextRound()
   {
   case Round::WaitGameStart: return Round::ThreeCards1;
   case Round::ThreeCards1: return Round::ThreeCards2;
+  case Round::ThreeCards2: return Round::WaitPostGameFinish;
   case Round::WaitPostGameFinish: return Round::WaitGameStart;
   default:
     return Round::WaitGameStart;

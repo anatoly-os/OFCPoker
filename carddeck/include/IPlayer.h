@@ -46,10 +46,10 @@ namespace CPoker
     virtual IDeck::CardsList bottomRow() const = 0;
     virtual IDeck::CardsList foldZone() const = 0;
 
-    virtual void setTopRowCards(const IDeck::CardsList&) = 0;
-    virtual void setMidRowCards(const IDeck::CardsList&) = 0;
-    virtual void setBottomRowCards(const IDeck::CardsList&) = 0;
-    virtual void setFoldZoneCards(const IDeck::CardsList&) = 0;
+    virtual void insertTopRowCards(const IDeck::CardsList&) = 0;
+    virtual void insertMidRowCards(const IDeck::CardsList&) = 0;
+    virtual void insertBottomRowCards(const IDeck::CardsList&) = 0;
+    virtual void insertFoldZoneCards(const IDeck::CardsList&) = 0;
 
     virtual IDeck::CardsList ingameCards() const = 0;
   };

@@ -25,6 +25,7 @@ bool TutorialStep1::init()
   drawBackground();
   drawDeck();
   drawCardHolders();
+  drawSelectFrame();
 
   drawButtons();
 
@@ -52,16 +53,16 @@ void TutorialStep1::drawDeck()
   addChild(m_pCardDeck, 2);
 }
 
-void TutorialStep1::drawCardBack()
+void TutorialStep1::drawDealtCardsBack()
 {
   if (m_pDealtCardsBack.empty())
   {
-    m_pDealtCardsBack.resize(3);
-    m_pDealtCardsBack[0] = Sprite::create("cards_back.png");
-    m_pDealtCardsBack[1] = Sprite::create("cards_back.png");
-    m_pDealtCardsBack[2] = Sprite::create("cards_back.png");
-    for (auto& card : m_pDealtCardsBack)
-      addChild(card, 1);
+    for (size_t i = 0; i < 3; ++i)
+    {
+      auto pCard = Sprite::create("cards_back.png");
+      m_pDealtCardsBack.insert(pCard);
+      addChild(pCard, 3);
+    }    
   }
 
   auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -73,30 +74,20 @@ void TutorialStep1::drawCardBack()
   }
 }
 
-void TutorialStep1::drawCardFront(const CPoker::IDeck::CardsList& cards)
+void TutorialStep1::drawDealtCardsFront(const CPoker::IDeck::CardsList& cards)
 {
-  if (m_pDealtCardsFront.empty())
-  {
-    m_pDealtCardsFront.resize(cards.size());
-    for (size_t i = 0; i < m_pDealtCardsFront.size(); ++i)
-    {
-      m_pDealtCardsFront[i] = Sprite::create(std::string("cards_") + cards[i]->toString() + std::string(".png"));
-      addChild(m_pDealtCardsFront[i], 5);
-    }
-  }
-  else
-  {
-    for (size_t i = 0; i < m_pDealtCardsFront.size(); ++i)
-      m_pDealtCardsFront[i]->setTexture(std::string("cards_") + cards[i]->toString() + std::string(".png"));
-  }
-
   auto origin = Director::getInstance()->getVisibleOrigin();
   auto visibleSize = Director::getInstance()->getVisibleSize();
-  for (auto& sprite : m_pDealtCardsFront)
+  if (m_pDealtCardsFront.empty())
   {
-    sprite->setPosition(origin.x + Vec2(visibleSize).x / 2,
-      origin.y + Vec2(visibleSize).y - Vec2(sprite->getContentSize() / 2).y - m_cFramePadding);
-    sprite->setVisible(false);
+    for (size_t i = 0; i < cards.size(); ++i)
+    {
+      auto sprite = Sprite::create(std::string("cards_") + cards[i]->toString() + std::string(".png"));
+      m_pDealtCardsFront.insert(sprite);
+      m_cardsConvertor[sprite] = cards[i];
+      sprite->setVisible(false);
+      addChild(sprite, 20);
+    }
   }
 
   //find proper place for event listeners initialization
@@ -107,67 +98,107 @@ void TutorialStep1::drawCardFront(const CPoker::IDeck::CardsList& cards)
     m_pTouchEventListener->onTouchBegan = CC_CALLBACK_2(TutorialStep1::onTouchBegan, this);
     m_pTouchEventListener->onTouchMoved = CC_CALLBACK_2(TutorialStep1::onTouchMoved, this);
     m_pTouchEventListener->onTouchEnded = CC_CALLBACK_2(TutorialStep1::onTouchEnded, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener, m_pDealtCardsFront[0]);
+    m_dummySpriteNotToReleaseTouchListener = Sprite::create();
+    m_dummySpriteNotToReleaseTouchListener->setVisible(false);
+    addChild(m_dummySpriteNotToReleaseTouchListener);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener, m_dummySpriteNotToReleaseTouchListener);
   }
-  else
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), m_pDealtCardsFront[0]);
 
-  _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), m_pDealtCardsFront[1]);
-  _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), m_pDealtCardsFront[2]);
+  for (auto& card : m_pDealtCardsFront)
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(m_pTouchEventListener->clone(), card);
 }
 
 void TutorialStep1::animateCardDealing()
 {
-  auto origin = Director::getInstance()->getVisibleOrigin();
-  auto visibleSize = Director::getInstance()->getVisibleSize();
-  Vec2 startPosition = m_pDealtCardsBack[0]->getPosition();
-  Vec2 endPosition = m_pDealtCardsBack[0]->getPosition() + Vec2(Vec2(visibleSize).x - 2 * m_cFramePadding - Vec2(m_pDealtCardsBack[0]->getContentSize()).x, 0);
-  FiniteTimeAction* deal1Actions = CPoker::GUICardDealer::dealCard(m_pDealtCardsFront[0], m_pDealtCardsBack[0], startPosition, endPosition);
-  FiniteTimeAction* deal2Actions = CPoker::GUICardDealer::dealCard(m_pDealtCardsFront[1], m_pDealtCardsBack[1], startPosition, endPosition - Vec2(Vec2(m_pDealtCardsBack[0]->getContentSize()).x, 0));
-  FiniteTimeAction* deal3Actions = CPoker::GUICardDealer::dealCard(m_pDealtCardsFront[2], m_pDealtCardsBack[2], startPosition, endPosition - 2 * Vec2(Vec2(m_pDealtCardsBack[0]->getContentSize()).x, 0));
+  std::vector<FiniteTimeAction*> dealActions;
+  auto frontCardsIt = m_pDealtCardsFront.begin();
+  auto backCardsIt = m_pDealtCardsBack.begin();
+  auto holderIt = m_dealtCardsHolders.begin();
+  Vec2 startPosition = (*m_pDealtCardsBack.begin())->getPosition();
+  while (frontCardsIt != m_pDealtCardsFront.end() ||
+         backCardsIt != m_pDealtCardsBack.end())
+  {
+    dealActions.push_back(CPoker::GUICardDealer::dealCard(*frontCardsIt, *backCardsIt, startPosition, (*holderIt)->getPosition()));
+    ++frontCardsIt;
+    ++backCardsIt;
+    ++holderIt;
+  }
+    
   FiniteTimeAction* delayTime1 = DelayTime::create(0.1f);
   FiniteTimeAction* delayTime2 = DelayTime::create(0.2f);
-  auto sequence2 = Sequence::create(delayTime1, deal2Actions, nullptr);
-  auto sequence3 = Sequence::create(delayTime2, deal3Actions, nullptr);
-  m_pDealtCardsBack[0]->runAction(deal1Actions);
-  m_pDealtCardsBack[1]->runAction(sequence2);
-  m_pDealtCardsBack[2]->runAction(sequence3);
+  auto sequence2 = Sequence::create(delayTime1, dealActions[1], nullptr);
+  auto sequence3 = Sequence::create(delayTime2, dealActions[2], nullptr);
+  std::vector<FiniteTimeAction*> sequences = { dealActions[0], sequence2, sequence3 };
+  auto actIt = sequences.begin();
+  for (auto& backCard : m_pDealtCardsBack)
+  {
+    backCard->runAction(*actIt);
+    ++actIt;
+  }
 }
 
 void TutorialStep1::drawCardHolders()
 {
+  drawPlayerCardsHolders();
+  drawDealtCardsHolders();
+}
+
+void TutorialStep1::drawPlayerCardsHolders()
+{
   if (m_pCardsHolders.empty())
   {
-    m_pCardsHolders.resize(3);
-    for (auto& holder : m_pCardsHolders)
-      holder.resize(3);
-
-    for (auto& holder : m_pCardsHolders)
+    for (size_t i = 0; i < 3; ++i)
     {
-      holder[0] = Sprite::create("cards_place.png");
-      holder[0]->setOpacity(50);
-      holder[1] = Sprite::create("cards_frame.png");
-      holder[2] = Sprite::create("cards_frame_h.png");
-      for (auto& inHolders : holder)
-        addChild(inHolders, 4);
+      auto pCard = Sprite::create("cards_place.png");
+      m_pCardsHolders.insert(pCard);
+      addChild(pCard, 2);
     }
   }
 
   auto origin = Director::getInstance()->getVisibleOrigin();
   auto visibleSize = Director::getInstance()->getVisibleSize();
-  for (size_t i = 0; i < m_pCardsHolders.size(); ++i)
+  int shiftMult = 0;
+  for (auto& card : m_pCardsHolders)
   {
-    auto holderPics = m_pCardsHolders[i];
-    Vec2 holderPosition{ origin.x + 2 * m_cFramePadding + (1 + i * 2) * Vec2(holderPics[0]->getContentSize() / 2).x,
-                         origin.y + m_cFramePadding + Vec2(holderPics[0]->getContentSize() / 2).y };
-    for (auto& inHolders : holderPics)
-    {
-      inHolders->setPosition(holderPosition);
-      inHolders->setVisible(true);
-    }
-
-    holderPics[2]->setVisible(false);
+    Vec2 holderPosition{ origin.x + (2 + shiftMult) * m_cFramePadding + (1 + shiftMult * 2) * Vec2(card->getContentSize() / 2).x,
+      origin.y + m_cFramePadding + Vec2(card->getContentSize() / 2).y };
+    card->setPosition(holderPosition);
+    ++shiftMult;
   }
+}
+
+void TutorialStep1::drawDealtCardsHolders()
+{
+  if (m_dealtCardsHolders.empty())
+  {
+    for (size_t i = 0; i < 3; ++i)
+    {
+      auto pCard = Sprite::create("cards_place.png");
+      m_dealtCardsHolders.insert(pCard);
+      addChild(pCard, 2);
+    }
+  }
+
+  auto origin = Director::getInstance()->getVisibleOrigin();
+  auto visibleSize = Director::getInstance()->getVisibleSize();
+  int shiftMult = 0;
+  for (auto& card : m_dealtCardsHolders)
+  {
+    Vec2 holderPosition{ m_pCardDeck->getPositionX() + Vec2(visibleSize).x - (1 + shiftMult) * Vec2(m_pCardDeck->getContentSize()).x - (2 + shiftMult) * m_cFramePadding,
+      m_pCardDeck->getPositionY() };
+    card->setPosition(holderPosition);
+    card->setVisible(true);
+    //card->setVisible(false);
+    ++shiftMult;
+  }
+}
+
+void TutorialStep1::drawSelectFrame()
+{
+  m_pCardFrame = Sprite::create("cards_frame_h.png");
+  m_pCardFrame->setOpacity(150);
+  addChild(m_pCardFrame, 3);
+  m_pCardFrame->setVisible(false);
 }
 
 void TutorialStep1::drawNewGameButton()
@@ -182,7 +213,7 @@ void TutorialStep1::drawNewGameButton()
 
   auto menu = Menu::create(m_pNewGameButton, nullptr);
   menu->setPosition(Vec2::ZERO);
-  addChild(menu, 1000);
+  addChild(menu, 10);
 }
 
 void TutorialStep1::drawReadyButton()
@@ -201,7 +232,7 @@ void TutorialStep1::drawReadyButton()
 
   auto menu = Menu::create(m_pReadyButton, nullptr);
   menu->setPosition(Vec2::ZERO);
-  addChild(menu, 1000);
+  addChild(menu, 10);
 }
 
 void TutorialStep1::drawButtons()
@@ -209,6 +240,17 @@ void TutorialStep1::drawButtons()
   //order matters! positions depend on previously added buttons
   drawReadyButton();
   drawNewGameButton();
+}
+
+void TutorialStep1::clearCards()
+{
+  for (auto& card : m_pDealtCardsFront)
+    removeChild(card);
+  m_pDealtCardsFront.clear();
+
+  for (auto& card : m_playerCards)
+    removeChild(card);
+  m_playerCards.clear();
 }
 
 bool TutorialStep1::onTouchBegan(Touch * touch, Event * event)
@@ -219,7 +261,36 @@ bool TutorialStep1::onTouchBegan(Touch * touch, Event * event)
 
   m_movedSpriteInitPosition = activeSprite->getPosition();
   m_initialTouchPosition = touch->getLocation();
+  activeSprite->setLocalZOrder(100);
   return true;
+}
+
+TutorialStep1::SpritePtr TutorialStep1::checkIntersectionWithPlayerHolders(SpritePtr pActiveCard)
+{
+  SpritePtr pHolderToPlaceIn = nullptr;
+  auto it = std::find_if(m_pCardsHolders.begin(), m_pCardsHolders.end(), [pActiveCard](auto& holder)
+  {
+    return pActiveCard->getBoundingBox().containsPoint(holder->getPosition());
+  });
+
+  if (it != m_pCardsHolders.end())
+    pHolderToPlaceIn = *it;
+
+  return pHolderToPlaceIn;
+}
+
+TutorialStep1::SpritePtr TutorialStep1::checkIntersectionWithDealtCardsHolders(SpritePtr pActiveCard)
+{
+  SpritePtr pHolderToPlaceIn = nullptr;
+  auto it = std::find_if(m_dealtCardsHolders.begin(), m_dealtCardsHolders.end(), [pActiveCard](auto& holder)
+  {
+    return pActiveCard->getBoundingBox().containsPoint(holder->getPosition());
+  });
+
+  if (it != m_dealtCardsHolders.end())
+    pHolderToPlaceIn = *it;
+
+  return pHolderToPlaceIn;
 }
 
 void TutorialStep1::onTouchMoved(Touch * touch, Event * event)
@@ -227,52 +298,53 @@ void TutorialStep1::onTouchMoved(Touch * touch, Event * event)
   auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
   activeSprite->setPosition(m_movedSpriteInitPosition + touch->getLocation() - m_initialTouchPosition);
 
-  for (auto& holder : m_pCardsHolders)
+  auto pHolderToPlaceIn = checkIntersectionWithPlayerHolders(activeSprite);
+  if (!pHolderToPlaceIn)
+    pHolderToPlaceIn = checkIntersectionWithDealtCardsHolders(activeSprite);
+
+  if (pHolderToPlaceIn)
   {
-    if (activeSprite->getBoundingBox().containsPoint(holder[0]->getPosition()))
-    {
-      holder[1]->setVisible(false);
-      holder[2]->setVisible(true);
-    }
-    else
-    {
-      holder[1]->setVisible(true);
-      holder[2]->setVisible(false);
-    }
+    m_pCardFrame->setVisible(true);
+    m_pCardFrame->setPosition(pHolderToPlaceIn->getPosition());
   }
+  else
+    m_pCardFrame->setVisible(false);
 }
 
 void TutorialStep1::onTouchEnded(Touch * touch, Event * event)
 {
   auto activeSprite = static_cast<Sprite*>(event->getCurrentTarget());
   
-  bool cardPlacedInHolder = false;
-  for (auto& holder : m_pCardsHolders)
+  auto pHolderToPlaceIn = checkIntersectionWithPlayerHolders(activeSprite);
+  if (pHolderToPlaceIn)
   {
-    if (activeSprite->getBoundingBox().containsPoint(holder[0]->getPosition()))
-    {
-      activeSprite->setPosition(holder[0]->getPosition());
-      cardPlacedInHolder = true;
-    }      
+    activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+    m_activePlayerCards.insert(activeSprite);
+  }
+  else
+  {
+    m_activePlayerCards.erase(activeSprite);
+    pHolderToPlaceIn = checkIntersectionWithDealtCardsHolders(activeSprite);
+    if (pHolderToPlaceIn)
+      activeSprite->setPosition(pHolderToPlaceIn->getPosition());
   }
 
-  if (!cardPlacedInHolder)
-    activeSprite->setPosition(m_movedSpriteInitPosition);
-  
-  for (auto& holder : m_pCardsHolders)
-  {
-    holder[1]->setVisible(true);
-    holder[2]->setVisible(false);
-  }
+  if (m_pGameController->round() == CPoker::IGameController::Round::ThreeCards1 && m_activePlayerCards.size() == 2)
+    m_pReadyButton->setEnabled(true);
+  else if (m_pGameController->round() == CPoker::IGameController::Round::ThreeCards2 &&
+    m_playerCards.size() == 2 &&
+    m_activePlayerCards.size() == 1)
+    m_pReadyButton->setEnabled(true);
+
+  activeSprite->setLocalZOrder(20);
+  m_pCardFrame->setVisible(false);
 }
 
 void TutorialStep1::nextMove()
 {
   if (m_pGameController->round() != CPoker::IGameController::Round::WaitPostGameFinish)
   {
-    //deal cards
     dealCards();
-    //wait for timer (or done button)
   }
   else
   {
@@ -283,6 +355,7 @@ void TutorialStep1::nextMove()
 void TutorialStep1::startGame()
 {
   m_pNewGameButton->setEnabled(false);
+  clearCards();
 
   std::vector<CPoker::IPlayer::ID> players{ m_playerId };
   m_pGameController->startGame(players);
@@ -292,14 +365,30 @@ void TutorialStep1::startGame()
 void TutorialStep1::playerIsReady()
 {
   m_pReadyButton->setEnabled(false);
+  CPoker::IDeck::CardsList chosenCards;
+  for (auto& card : m_pDealtCardsFront)
+  {
+    if (m_activePlayerCards.end() == m_activePlayerCards.find(card))
+      removeChild(card);
+    else
+    {
+      _eventDispatcher->pauseEventListenersForTarget(card);
+      chosenCards.push_back(m_cardsConvertor[card]);
+    }      
+  }
+  m_pDealtCardsFront.clear();
+
+  m_playerCards.insert(m_activePlayerCards.begin(), m_activePlayerCards.end());
+  m_activePlayerCards.clear();
+
+  m_pGameController->playerFinished(chosenCards);
   nextMove();
 }
 
 void TutorialStep1::dealCards()
 {
   auto dealtCards = m_pGameController->dealCardsForActivePlayer();
-  drawCardBack();
-  drawCardFront(dealtCards);
+  drawDealtCardsBack();
+  drawDealtCardsFront(dealtCards);
   animateCardDealing();
-  m_pReadyButton->setEnabled(true);
 }

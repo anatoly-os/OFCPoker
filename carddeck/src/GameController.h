@@ -21,7 +21,7 @@ namespace CPoker
 
     IDeck::CardsList playerIngameCards(const IPlayer::ID&) const override;
 
-    void playerFinished(const IDeck::CardsList&) override;
+    void playerFinished(const IDeck::CardsList& top, const IDeck::CardsList& mid, const IDeck::CardsList& bottom) override;
 
   private:
     Round nextRound();

@@ -37,22 +37,22 @@ IDeck::CardsList CPoker::Player::foldZone() const
   return IDeck::CardsList();
 }
 
-void CPoker::Player::setTopRowCards(const IDeck::CardsList& cards)
+void CPoker::Player::insertTopRowCards(const IDeck::CardsList& cards)
 {
   m_top.insert(m_top.end(), cards.begin(), cards.end());
 }
 
-void CPoker::Player::setMidRowCards(const IDeck::CardsList& cards)
+void CPoker::Player::insertMidRowCards(const IDeck::CardsList& cards)
 {
   m_mid.insert(m_mid.end(), cards.begin(), cards.end());
 }
 
-void CPoker::Player::setBottomRowCards(const IDeck::CardsList& cards)
+void CPoker::Player::insertBottomRowCards(const IDeck::CardsList& cards)
 {
   m_bottom.insert(m_bottom.end(), cards.begin(), cards.end());
 }
 
-void CPoker::Player::setFoldZoneCards(const IDeck::CardsList& cards)
+void CPoker::Player::insertFoldZoneCards(const IDeck::CardsList& cards)
 {
   m_foldZone.insert(m_foldZone.end(), cards.begin(), cards.end());
 }

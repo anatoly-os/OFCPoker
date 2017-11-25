@@ -34,6 +34,8 @@ namespace CPoker
 
     virtual IDeck::CardsList playerIngameCards(const IPlayer::ID&) const = 0;
 
-    virtual void playerFinished(const IDeck::CardsList&) = 0;
+    virtual void playerFinished(const IDeck::CardsList& = IDeck::CardsList(),
+      const IDeck::CardsList& = IDeck::CardsList(),
+      const IDeck::CardsList& = IDeck::CardsList()) = 0;
   };
 }
