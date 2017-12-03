@@ -314,25 +314,47 @@ void TutorialStep1::onTouchEnded(Touch * touch, Event * event)
       activeSprite->setPosition(m_initialDragCardPosition);
     else
     {
-      m_activePlayerCards.insert(activeSprite);
       auto intersecedWithCard = checkIntersection(activeSprite, m_activePlayerCards);
       if (intersecedWithCard)
       {
         activeSprite->setPosition(pHolderToPlaceIn->getPosition());
         intersecedWithCard->setPosition(m_initialDragCardPosition);
-        m_activePlayerCards.erase(intersecedWithCard);
+        //active card is from dealt cards
+        if (0 == m_activePlayerCards.count(activeSprite))
+        {
+          m_activePlayerCards.erase(intersecedWithCard);
+          m_activePlayerCards.insert(activeSprite);
+        }
       }
       else
+      {
         activeSprite->setPosition(pHolderToPlaceIn->getPosition());
+        //active card is from dealt cards
+        if (0 == m_activePlayerCards.count(activeSprite))
+          m_activePlayerCards.insert(activeSprite);
+
+        if (m_activePlayerCards.size() == 3)
+        {
+          auto playerCardsWithoutActive = m_activePlayerCards;
+          playerCardsWithoutActive.erase(activeSprite);
+          auto leftmostcard = std::min_element(playerCardsWithoutActive.begin(), playerCardsWithoutActive.end(), [](auto& card1, auto& card2)
+          {
+            return card1->getPosition() < card2->getPosition();
+          });
+          (*leftmostcard)->setPosition(m_initialDragCardPosition);
+          m_activePlayerCards.erase(*leftmostcard);
+        }
+      }      
     }
   }
   else
   {
     //place card not to placeholder
-    m_activePlayerCards.erase(activeSprite);
     pHolderToPlaceIn = checkIntersection(activeSprite, m_dealtCardsHolders);
     if (pHolderToPlaceIn)
     {
+      m_activePlayerCards.erase(activeSprite);
+
       //place card to dealt cards placeholder
       //if intersects with dealt card: swap cards
       //else: place
@@ -356,6 +378,8 @@ void TutorialStep1::onTouchEnded(Touch * touch, Event * event)
     m_playerCards.size() == 2 &&
     m_activePlayerCards.size() == 1)
     m_pReadyButton->setEnabled(true);
+  else
+    m_pReadyButton->setEnabled(false);
 
   activeSprite->setLocalZOrder(20);
   m_pCardFrame->setVisible(false);
@@ -394,6 +418,7 @@ void TutorialStep1::playerIsReady()
     else
     {
       _eventDispatcher->pauseEventListenersForTarget(card);
+      card->setColor(Color3B::GRAY);
       chosenCards.push_back(m_cardsConvertor[card]);
     }      
   }
